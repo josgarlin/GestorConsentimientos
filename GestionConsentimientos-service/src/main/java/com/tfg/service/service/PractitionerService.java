@@ -58,9 +58,9 @@ public class PractitionerService {
 		KieUtil util = new KieUtil();
 		KieServicesClient kieServicesClient = util.getKieServicesClient();
 		UserTaskServicesClient userClient = kieServicesClient.getServicesClient(UserTaskServicesClient.class);
-		QueryServicesClient queryClient = kieServicesClient.getServicesClient(QueryServicesClient.class);
 		
-		// Obtenemos el id de la tarea con la que queremos trabajar, la del proceso instanciado
+		QueryServicesClient queryClient = kieServicesClient.getServicesClient(QueryServicesClient.class);
+				// Obtenemos el id de la tarea con la que queremos trabajar, la del proceso instanciado
 		Long idTask = getIdTask(userClient, Long.valueOf(idInstanceProcess));
 		
 		// Comprobamos que el id de la tarea no sea null
