@@ -1,0 +1,113 @@
+<!DOCTYPE html>
+<html xmlns:sec="http://www.springframework.org/security/tags">
+<head>
+<meta charset="ISO-8859-1">
+<title>Gestor Consentimientos</title>
+<style type="text/css">
+html {
+    height: 100%;
+}
+
+body {
+    margin: 0;
+    padding: 0;
+    font-family: sans-serif;
+    background: linear-gradient(#141e30, #243b55);
+}
+
+.container {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    height: 100%;
+}
+
+.menu-box {
+    position: absolute;
+	top: 50%;
+	left: 50%;
+	transform: translate(-50%, -50%);
+    width: 400px;
+    padding: 40px;
+    background: rgba(0, 0, 0, .5);
+    box-shadow: 0 15px 25px rgba(0, 0, 0, .6);
+    border-radius: 10px;
+    text-align: center;
+}
+
+.menu-box h2 {
+    margin: 0 0 30px;
+    color: #fff;
+}
+
+.menu-links a {
+    display: block;
+    margin-bottom: 10px;
+    padding: 10px 20px;
+    font-size: 16px;
+    text-transform: uppercase;
+    color: #03e9f4;
+    border: 2px solid #03e9f4;
+    border-radius: 5px;
+    cursor: pointer;
+    outline: none;
+    transition: background-color 0.3s, color 0.3s;
+}
+
+.logout-button {
+    position: absolute;
+    top: 20px;
+    right: 20px;
+    display: inline-block;
+    padding: 10px 20px;
+    font-size: 16px;
+    text-decoration: none;
+    text-transform: uppercase;
+    background: transparent;
+    color: #03e9f4;
+    border: 2px solid #03e9f4;
+    border-radius: 5px;
+    cursor: pointer;
+    outline: none;
+    transition: background-color 0.3s, color 0.3s;
+}
+
+.menu-links a:hover, .logout-button:hover {
+    background-color: #03e9f4;
+    color: #fff;
+}
+
+.menu-links a:active, .logout-button:active {
+    background-color: #03c2d8;
+    border-color: #03c2d8;
+}
+
+.menu-links {
+    margin-top: 20px;
+}
+
+.menu-links a {
+    text-decoration: none;
+}
+</style>
+</head>
+<body>
+    <!-- <span th:if="${session.user != null}">Welcome <span class="font-italic" th:text="${session.user.name}"></span></span>
+    </br>
+    </br>
+    <span th:if="${session.user != null}">Role: <span class="font-italic" sec:authentication="principal.authorities"></span></span> -->
+    
+<div class="container">
+    <div class="menu-box">
+        <h2>Menu</h2>
+        <div class="menu-links">
+            <a th:href="@{/private/practitioner}">Practitioner</a>
+            <a th:href="@{/private/patient}">Patient</a>
+        </div>
+    </div>
+    <form th:action="@{/logout}" method="POST">
+        <button class="logout-button">Logout</button>
+    </form>
+</div>
+</body>
+</html>

@@ -10,33 +10,55 @@ import org.springframework.security.config.annotation.authentication.builders.Au
 import org.springframework.security.config.annotation.web.builders.HttpSecurity;
 import org.springframework.security.config.annotation.web.configuration.EnableWebSecurity;
 import org.springframework.security.config.annotation.web.configuration.WebSecurityConfigurerAdapter;
-import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.security.crypto.password.NoOpPasswordEncoder;
+import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.web.cors.CorsConfiguration;
 import org.springframework.web.cors.CorsConfigurationSource;
 import org.springframework.web.cors.UrlBasedCorsConfigurationSource;
 
+import com.tfg.service.models.service.impl.UserDetailsServiceImpl;
+
 @Configuration("kieServerSecurity")
 @EnableWebSecurity
 public class DefaultWebSecurityConfig extends WebSecurityConfigurerAdapter {
+	
+	@Autowired
+	private UserDetailsServiceImpl userDetailsService;
 
     @Override
     protected void configure(HttpSecurity http) throws Exception {
-        http
-                .cors().and()
-                .csrf().disable()
-                .authorizeRequests()
-                .antMatchers("/rest/*").authenticated().and()
-                .httpBasic().and()
-                .headers().frameOptions().disable();
+//        http
+//                .cors().and()
+//                .csrf().disable()
+//                .authorizeRequests()
+//                .antMatchers("/rest/*").authenticated().and()
+//                .httpBasic().and()
+//                .headers().frameOptions().disable();
+    	
+    	http
+			.authorizeRequests()
+				.antMatchers("/", "/login/**", "/signup/**", "/rest/**").permitAll()
+				.anyRequest().authenticated()
+				.and()
+			.formLogin()
+				.loginPage("/login")
+				.defaultSuccessUrl("/private/", true)
+				.failureUrl("/login?error")
+				.loginProcessingUrl("/loginUser").permitAll()
+				.and()
+			.headers().frameOptions().disable().and()
+			.csrf().disable()
+			.cors();
     }
 
     @Autowired
     public void configureGlobal(AuthenticationManagerBuilder auth) throws Exception {
 
-        auth.inMemoryAuthentication().withUser("user").password("user").roles("kie-server");
-        auth.inMemoryAuthentication().withUser("wbadmin").password("wbadmin").roles("admin");
-        auth.inMemoryAuthentication().withUser("kieserver").password("kieserver1!").roles("kie-server");
+//        auth.inMemoryAuthentication().withUser("user").password("user").roles("kie-server");
+//        auth.inMemoryAuthentication().withUser("wbadmin").password("wbadmin").roles("admin");
+//        auth.inMemoryAuthentication().withUser("kieserver").password("kieserver1!").roles("kie-server");
+    	
+    	auth.userDetailsService(userDetailsService).passwordEncoder(passwordEncoder());
     }
 
     @Bean

@@ -1,0 +1,167 @@
+<!DOCTYPE html>
+<html>
+<head>
+<meta charset="ISO-8859-1">
+<title>Gestor Consentimientos</title>
+<style>
+html {
+	height: 100%;
+}
+
+body {
+	margin: 0;
+	padding: 0;
+	font-family: sans-serif;
+	background: linear-gradient(#141e30, #243b55);
+}
+
+.signup-box {
+	position: absolute;
+	top: 50%;
+	left: 50%;
+	transform: translate(-50%, -50%);
+	width: 400px;
+	padding: 40px;
+	background: rgba(0, 0, 0, .5);
+	box-shadow: 0 15px 25px rgba(0, 0, 0, .6);
+	border-radius: 10px;
+	text-align: center;
+}
+
+.signup-box h2 {
+	margin: 0 0 30px;
+	color: #fff;
+}
+
+.signup-box .user-box {
+	position: relative;
+	margin-bottom: 30px;
+}
+
+.signup-box .user-box input {
+	width: 100%;
+	padding: 10px 0;
+	font-size: 16px;
+	color: #fff;
+	border: none;
+	border-bottom: 1px solid #fff;
+	outline: none;
+	background: transparent;
+}
+
+.signup-box .user-box label {
+	position: absolute;
+	top: 0;
+	left: 0;
+	padding: 10px 0;
+	font-size: 16px;
+	color: #fff;
+	pointer-events: none;
+	transition: .5s;
+}
+
+.signup-box .user-box input:focus ~label, .signup-box .user-box input:valid
+	 ~label {
+	top: -20px;
+	left: 0;
+	color: #03e9f4;
+	font-size: 12px;
+}
+
+.signup-box input[type="submit"] {
+	display: inline-block;
+	padding: 10px 20px;
+	color: #03e9f4;
+	font-size: 16px;
+	text-decoration: none;
+	text-transform: uppercase;
+	background: transparent;
+	border: 2px solid #03e9f4;
+	border-radius: 5px;
+	cursor: pointer;
+	outline: none;
+}
+
+.signup-box input[type="submit"]:hover {
+	background: #03e9f4;
+	color: #fff;
+	box-shadow: 0 0 5px #03e9f4, 0 0 25px #03e9f4, 0 0 50px #03e9f4, 0 0
+		100px #03e9f4;
+}
+
+
+
+.signin-link {
+	position: absolute;
+	top: 20px;
+	right: 20px;
+}
+
+.signin-link a {
+	color: #03e9f4;
+	text-decoration: none;
+}
+
+.signin-link a:hover {
+	color: #fff;
+}
+
+.error {
+  position: absolute;
+  top: 8%;
+  left: 50%;
+  transform: translate(-50%, -50%);;
+  text-align: center;
+  color: red;
+}
+
+.practitioner {
+  /* display: flex; */
+  /* justify-content: flex-end; */
+}
+
+.practitioner scan {
+  margin-right: 10px;
+  color: white;
+}
+</style>
+</head>
+<body>
+	<div th:if="${param.error}" class="error">Invalid DNI format</div>
+	<div th:if="${param.exist}" class="error">DNI already exists</div>
+	<div class="signup-box">
+		<h2>Sign Up</h2>
+		<form th:action="@{/signup}" th:object="${user}" method="post">
+			<div class="user-box">
+				<input type="text" name="name" required th:field="*{name}" autocomplete="off" /> 
+				<label>Name</label>
+			</div>
+			<div class="user-box">
+				<input type="text" name="surname" required th:field="*{surname}" autocomplete="off" /> 
+				<label>Surname</label>
+			</div>
+			<div class="user-box">
+				<input type="email" name="email" required th:field="*{email}" autocomplete="off" /> 
+				<label>Email</label>
+			</div>
+			<div class="user-box">
+				<input id="dni" type="text" name="dni" required th:field="*{dni}" autocomplete="off" /> 
+				<label>DNI</label>
+			</div>
+			<div class="user-box">
+				<input type="password" name="password" required th:field="*{password}" /> 
+				<label>Password</label>
+			</div>
+			
+			<div class="user-box practitioner">
+				<input type="checkbox" name="role" th:field="*{practitioner}" /> 
+				<scan>Is practitioner?</scan>
+			</div>
+			<input type="submit" value="Sign up">
+		</form>
+	</div>
+	<div class="link signin-link">
+		<a th:href="@{/login}">Sign in</a>
+	</div>
+</body>
+</html>
