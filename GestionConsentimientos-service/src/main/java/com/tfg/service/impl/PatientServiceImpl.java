@@ -24,6 +24,7 @@ import com.tfg.service.mapper.MapToQuestionnaireResponse;
 import com.tfg.service.mapper.QuestionnaireResponseToQuestionnaire;
 import com.tfg.service.mapper.QuestionnaireToFormPatient;
 import com.tfg.service.models.dao.IPatientInstancesDAO;
+import com.tfg.service.models.dao.IUserDAO;
 import com.tfg.service.models.entity.PatientInstances;
 import com.tfg.service.models.entity.User;
 
@@ -35,10 +36,6 @@ public class PatientServiceImpl implements IPatientService {
 
 	@Value("${kieserver.location}")
 	private String URL;
-	@Value("${kieserver.username}")
-	private String USERNAME;
-	@Value("${kieserver.password}")
-	private String PASSWORD;
 
 	private KieUtil util;
 
@@ -56,8 +53,11 @@ public class PatientServiceImpl implements IPatientService {
 
 	@Autowired
 	private IPatientInstancesDAO patientInstancesDAO;
+	
+	@Autowired 
+	private IUserDAO userDAO;
 
-	private final CreatePatientMenu createPatientMenu = new CreatePatientMenu();
+	private CreatePatientMenu createPatientMenu;
 	private final QuestionnaireResponseToQuestionnaire questionnaireResponseToQuestionnaire = new QuestionnaireResponseToQuestionnaire();
 	private final QuestionnaireToFormPatient questionnaireToFormPatient = new QuestionnaireToFormPatient();
 	private MapToQuestionnaireResponse mapToQuestionnaireResponse;
@@ -77,6 +77,9 @@ public class PatientServiceImpl implements IPatientService {
 			instances.add(patientInstances.getInstance());
 		}
 
+		// Comprobamos si ademas de Patient es Practitioner
+		Boolean isPractitioner = userDAO.isPractitionerByDni(dni);
+		createPatientMenu = new CreatePatientMenu(isPractitioner);
 		contentHtml = createPatientMenu.map(instances);
 
 		return contentHtml;
@@ -87,7 +90,8 @@ public class PatientServiceImpl implements IPatientService {
 		String contentHtml = null;
 
 		this.user = user;
-		util = new KieUtil(URL, USERNAME, PASSWORD);
+//		util = new KieUtil(URL, USERNAME, PASSWORD);
+		util = new KieUtil(URL, user.getDni(), userDAO.findByDni(user.getDni()).getPassword());
 
 		this.idInstanceProcess = idInstanceProcess;
 		contentHtml = startTask(idInstanceProcess);

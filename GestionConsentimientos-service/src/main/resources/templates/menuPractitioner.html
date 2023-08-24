@@ -98,6 +98,16 @@ body {
   text-align: center;
   color: green;
 }
+
+.home-link {
+    position: absolute;
+    top: 20px;
+    left: 20px;
+    font-size: 18px;
+    color: #fff;
+    text-decoration: none;
+    cursor: pointer;
+}
 </style>
 </head>
 <body>
@@ -107,6 +117,8 @@ body {
     <span th:if="${session.user != null}">Role: <span class="font-italic" sec:authentication="principal.authorities"></span></span> -->
     
 <div class="container">
+	<a class="home-link" th:href="@{/private/}">Home</a>
+
 	<div th:if="${param.success}" class="correct">Request successfully submitted</div>
     <div class="menu-box">
         <h2>Menu</h2>

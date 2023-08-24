@@ -31,7 +31,7 @@ public class MenuController {
 	
 	@GetMapping("/")
 	public String menu(Authentication auth, HttpSession session) {
-		String out = null;
+		String out = "menu";
 		String username = auth.getName();
 		
 		if (session.getAttribute("user") == null) {

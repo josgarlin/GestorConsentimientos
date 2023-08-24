@@ -39,10 +39,6 @@ public class PractitionerServiceImpl implements IPractitionerService {
 	
 	@Value("${kieserver.location}")
 	private String URL;
-	@Value("${kieserver.username}")
-	private String USERNAME;
-	@Value("${kieserver.password}")
-	private String PASSWORD;
 	
 	private KieUtil util;
 	
@@ -75,7 +71,7 @@ public class PractitionerServiceImpl implements IPractitionerService {
 		String contentHtml = null;
 		
 		this.user = user;
-		util = new KieUtil(URL, USERNAME, PASSWORD);
+		util = new KieUtil(URL, user.getDni(), userDAO.findByDni(user.getDni()).getPassword());
 		
 		Long idInstanceProcess = newInstanceProcess();
 		contentHtml = startTask(idInstanceProcess);
@@ -89,9 +85,6 @@ public class PractitionerServiceImpl implements IPractitionerService {
 			
 		ProcessServicesClient processServicesClient = util.getProcessServicesClient();
 		
-//		Map<String, Object> variables = new HashMap<String, Object>();
-//		variables.put("initiator", user.getDni());  // NO SE REALIZA EL CAMBIO
-			
 		logger.info("PROCEDEMOS A CREAR UNA NUEVA INSTANCIA DEL PROCESO");
 		idInstanceProcess = processServicesClient.startProcess(containerId, processId);
 		logger.info("INSTANCIA CREADA CORRECTAMENTE CON ID = "+idInstanceProcess);
@@ -209,7 +202,7 @@ public class PractitionerServiceImpl implements IPractitionerService {
 		List<Integer> status = new ArrayList<Integer>();
 		// Estado "Activo"
 		status.add(1);
-		List<ProcessInstance> processInstancesList = queryClient.findProcessInstancesByContainerId(containerId+"_1.0-SNAPSHOT", status, 0, 10);
+		List<ProcessInstance> processInstancesList = queryClient.findProcessInstancesByContainerId(containerId+"-1_0-SNAPSHOT", status, 0, 10);
 		System.out.println(processInstancesList);
 			
 		for (ProcessInstance processInstance : processInstancesList) {

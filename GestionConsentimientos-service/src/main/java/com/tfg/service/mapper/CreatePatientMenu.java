@@ -3,6 +3,12 @@ package com.tfg.service.mapper;
 import java.util.List;
 
 public class CreatePatientMenu implements IMapper<List<Long>, String> {
+	
+	private Boolean practitioner;
+	
+	public CreatePatientMenu(Boolean practitioner) {
+		this.practitioner = practitioner;
+	}
 
 	@Override
 	public String map(List<Long> in) {
@@ -41,8 +47,13 @@ public class CreatePatientMenu implements IMapper<List<Long>, String> {
 	
 	private String generateBody(List<Long> instances) {
 		String body = "<body>\r\n"
-				+ "<div class=\"container\">\r\n"
-				+ "    <div class=\"menu-box\">\r\n"
+				+ "<div class=\"container\">\r\n";
+		
+		if (practitioner) {
+			body = body + "<a class=\"home-link\" href=\"/private/\">Home</a>";
+		}
+		
+		body = body + "    <div class=\"menu-box\">\r\n"
 				+ "        <h2>Pending consent request</h2>\r\n"
 				+ "        <div class=\"menu-links\">\r\n";
 		
@@ -151,6 +162,16 @@ public class CreatePatientMenu implements IMapper<List<Long>, String> {
 				+ "\r\n"
 				+ ".menu-links a {\r\n"
 				+ "    text-decoration: none;\r\n"
+				+ "}\r\n"
+				+ "\r\n"
+				+ ".home-link {\r\n"
+				+ "    position: absolute;\r\n"
+				+ "    top: 20px;\r\n"
+				+ "    left: 20px;\r\n"
+				+ "    font-size: 18px;\r\n"
+				+ "    color: #fff;\r\n"
+				+ "    text-decoration: none;\r\n"
+				+ "    cursor: pointer;\r\n"
 				+ "}\r\n"
 				+ "</style>\r\n";
 		

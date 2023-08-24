@@ -27,17 +27,19 @@ public class DefaultWebSecurityConfig extends WebSecurityConfigurerAdapter {
 
     @Override
     protected void configure(HttpSecurity http) throws Exception {
-//        http
-//                .cors().and()
-//                .csrf().disable()
-//                .authorizeRequests()
-//                .antMatchers("/rest/*").authenticated().and()
-//                .httpBasic().and()
-//                .headers().frameOptions().disable();
+        http
+                .cors().and()
+                .csrf().disable()
+                .authorizeRequests()
+                .antMatchers("/rest/*").authenticated().and()
+                .httpBasic().and()
+                .headers().frameOptions().disable();
     	
     	http
 			.authorizeRequests()
-				.antMatchers("/", "/login/**", "/signup/**", "/rest/**").permitAll()
+//				.antMatchers("/", "/login/**", "/signup/**", "/rest/**").permitAll()
+				.antMatchers("/", "/login/**", "/signup/**").permitAll()
+				.antMatchers("/rest/*").authenticated()
 				.anyRequest().authenticated()
 				.and()
 			.formLogin()
@@ -59,6 +61,7 @@ public class DefaultWebSecurityConfig extends WebSecurityConfigurerAdapter {
 //        auth.inMemoryAuthentication().withUser("kieserver").password("kieserver1!").roles("kie-server");
     	
     	auth.userDetailsService(userDetailsService).passwordEncoder(passwordEncoder());
+//    	auth.inMemoryAuthentication().withUser("12345678a").password("1234").roles("Practitioner");
     }
 
     @Bean
