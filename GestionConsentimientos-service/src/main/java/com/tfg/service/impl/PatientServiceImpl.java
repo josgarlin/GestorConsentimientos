@@ -4,6 +4,7 @@ import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.Map.Entry;
 
 import javax.servlet.http.HttpServletRequest;
 
@@ -72,15 +73,15 @@ public class PatientServiceImpl implements IPatientService {
 
 		// Instancias de procesos del paciente autenticado
 		List<PatientInstances> patientInstancesList = patientInstancesDAO.findByPatient(dni);
-		List<Long> instances = new ArrayList<Long>();
+		Map<Long, String> instancesAndTitle = new HashMap<Long, String>();
 		for (PatientInstances patientInstances : patientInstancesList) {
-			instances.add(patientInstances.getInstance());
+			instancesAndTitle.put(patientInstances.getInstance(), patientInstances.getTitle());
 		}
 
 		// Comprobamos si ademas de Patient es Practitioner
 		Boolean isPractitioner = userDAO.isPractitionerByDni(dni);
 		createPatientMenu = new CreatePatientMenu(isPractitioner);
-		contentHtml = createPatientMenu.map(instances);
+		contentHtml = createPatientMenu.map(instancesAndTitle);
 
 		return contentHtml;
 	}
@@ -90,7 +91,6 @@ public class PatientServiceImpl implements IPatientService {
 		String contentHtml = null;
 
 		this.user = user;
-//		util = new KieUtil(URL, USERNAME, PASSWORD);
 		util = new KieUtil(URL, user.getDni(), userDAO.findByDni(user.getDni()).getPassword());
 
 		this.idInstanceProcess = idInstanceProcess;

@@ -47,7 +47,9 @@ public class QuestionnaireToFormPatient implements IMapper<Questionnaire, String
 		
 		body = "<body>\r\n"
 				+"<div class=\"box\">\r\n"
-				+ "<h2>Questionnaire</h2>\r\n"
+				+ "<h2>"
+				+ questionnaire.getTitle()
+				+ "</h2>\r\n"
 				+ "<form action=\"/private/patient\" method=\"post\">\r\n";
 		
 		for (Questionnaire.QuestionnaireItemComponent item : questionnaire.getItem()) {

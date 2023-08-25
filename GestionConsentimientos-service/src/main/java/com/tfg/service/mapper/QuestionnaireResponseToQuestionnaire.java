@@ -34,6 +34,12 @@ public class QuestionnaireResponseToQuestionnaire implements IMapper<Questionnai
 		Questionnaire questionnaire = new Questionnaire();
 		Questionnaire metaQuestionnaire = client.read().resource(Questionnaire.class).withUrl(response.getQuestionnaire()).execute();
 		
+		for (QuestionnaireResponse.QuestionnaireResponseItemComponent item : response.getItem().get(0).getItem()) {
+			if (item.getLinkId().equals("1.1")) {
+				questionnaire.setTitle(item.getAnswer().get(0).getValue().toString());
+			}
+		}
+		
 		questionnaire.setStatus(PublicationStatus.ACTIVE);
 		
 		for (QuestionnaireResponse.QuestionnaireResponseItemComponent item : response.getItem()) {
@@ -116,55 +122,57 @@ public class QuestionnaireResponseToQuestionnaire implements IMapper<Questionnai
 		for (QuestionnaireResponse.QuestionnaireResponseItemComponent item1 : item.getItem()) {
 			Questionnaire.QuestionnaireItemComponent it1 = null;
 			
-			for (Questionnaire.QuestionnaireItemComponent metaItem : it.getItem()) {
-				if (metaItem.getLinkId().equals(item1.getLinkId())) {
-					it1 = metaItem;
+			if (!(item1.getLinkId().equals("1.1"))) {    // Sentencia para que no se muestre el campo donde se pregunto el titulo del cuestionario
+				for (Questionnaire.QuestionnaireItemComponent metaItem : it.getItem()) {
+					if (metaItem.getLinkId().equals(item1.getLinkId())) {
+						it1 = metaItem;
+					}
 				}
-			}
-			
-			QuestionnaireItemComponent t = new QuestionnaireItemComponent();
-			switch (it1.getType()) {
-				case BOOLEAN:
-					t.setLinkId(item1.getLinkId())
-						.setText(item1.getText())
-						.setType(it1.getType())
-						.addAnswerOption().setValue(new StringType(Boolean.toString(item1.getAnswer().get(0).getValueBooleanType().booleanValue())));
-					example.add(t);
-					break;
-				case INTEGER:
-					t.setLinkId(item1.getLinkId())
-						.setText(item1.getText())
-						.setType(it1.getType())
-						.addAnswerOption().setValue(item1.getAnswer().get(0).getValue());
-					example.add(t);
-					break;
-				case STRING:
-					t.setLinkId(item1.getLinkId())
-						.setText(item1.getText())
-						.setType(it1.getType())
-						.addAnswerOption().setValue(item1.getAnswer().get(0).getValue());
-					example.add(t);
-					break;
-				case CHOICE:
-					t.setLinkId(item1.getLinkId())
-						.setText(item1.getText())
-						.setType(it1.getType())
-						.setAnswerOption(it1.getAnswerOption())
-						.addAnswerOption().setValue(item1.getAnswer().get(0).getValue());
-					example.add(t);
-					break;
-				case DATE:
-					t.setLinkId(item1.getLinkId())
-						.setText(item1.getText())
-						.setType(it1.getType())
-						.addAnswerOption().setValue(item1.getAnswer().get(0).getValue());
-					example.add(t);
-					break;
-				case GROUP:
-					addGroup(questionnaire, item1, it1);
-					break;
-				default:
-					throw new UnsupportedOperationException("Tipo de componente no soportado: " + it.getType().getDisplay());
+				
+				QuestionnaireItemComponent t = new QuestionnaireItemComponent();
+				switch (it1.getType()) {
+					case BOOLEAN:
+						t.setLinkId(item1.getLinkId())
+							.setText(item1.getText())
+							.setType(it1.getType())
+							.addAnswerOption().setValue(new StringType(Boolean.toString(item1.getAnswer().get(0).getValueBooleanType().booleanValue())));
+						example.add(t);
+						break;
+					case INTEGER:
+						t.setLinkId(item1.getLinkId())
+							.setText(item1.getText())
+							.setType(it1.getType())
+							.addAnswerOption().setValue(item1.getAnswer().get(0).getValue());
+						example.add(t);
+						break;
+					case STRING:
+						t.setLinkId(item1.getLinkId())
+							.setText(item1.getText())
+							.setType(it1.getType())
+							.addAnswerOption().setValue(item1.getAnswer().get(0).getValue());
+						example.add(t);
+						break;
+					case CHOICE:
+						t.setLinkId(item1.getLinkId())
+							.setText(item1.getText())
+							.setType(it1.getType())
+							.setAnswerOption(it1.getAnswerOption())
+							.addAnswerOption().setValue(item1.getAnswer().get(0).getValue());
+						example.add(t);
+						break;
+					case DATE:
+						t.setLinkId(item1.getLinkId())
+							.setText(item1.getText())
+							.setType(it1.getType())
+							.addAnswerOption().setValue(item1.getAnswer().get(0).getValue());
+						example.add(t);
+						break;
+					case GROUP:
+						addGroup(questionnaire, item1, it1);
+						break;
+					default:
+						throw new UnsupportedOperationException("Tipo de componente no soportado: " + it.getType().getDisplay());
+				}
 			}
 		}
 		

@@ -1,8 +1,10 @@
 package com.tfg.service.mapper;
 
+import java.util.ArrayList;
 import java.util.List;
+import java.util.Map;
 
-public class CreatePatientMenu implements IMapper<List<Long>, String> {
+public class CreatePatientMenu implements IMapper<Map<Long, String>, String> {
 	
 	private Boolean practitioner;
 	
@@ -11,20 +13,20 @@ public class CreatePatientMenu implements IMapper<List<Long>, String> {
 	}
 
 	@Override
-	public String map(List<Long> in) {
+	public String map(Map<Long, String> in) {
 		String contentHtml = generateHtml(in);
 		
 		return contentHtml;
 	}
 	
-	private String generateHtml(List<Long> instances) {
+	private String generateHtml(Map<Long, String> instancesAndTitle) {
 		String html = "<!DOCTYPE html>\r\n"
 				+ "<html xmlns:sec=\"http://www.springframework.org/security/tags\">\r\n";
 		
 		String head = generateHead();
 		html = html + head;
 		
-		String body = generateBody(instances);
+		String body = generateBody(instancesAndTitle);
 		html = html + body;
 		
 		html = html + "</html>";
@@ -45,7 +47,7 @@ public class CreatePatientMenu implements IMapper<List<Long>, String> {
 		return head;
 	}
 	
-	private String generateBody(List<Long> instances) {
+	private String generateBody(Map<Long, String> instancesAndTitle) {
 		String body = "<body>\r\n"
 				+ "<div class=\"container\">\r\n";
 		
@@ -57,11 +59,12 @@ public class CreatePatientMenu implements IMapper<List<Long>, String> {
 				+ "        <h2>Pending consent request</h2>\r\n"
 				+ "        <div class=\"menu-links\">\r\n";
 		
+		List<Long> instances = new ArrayList<Long>(instancesAndTitle.keySet());
 		for (Long idInstance : instances) {
 			body = body + "<a href=\"/private/patient/seeRequestedConsent?param="
 					+ idInstance
-					+ "\">Instancia: "
-					+ idInstance
+					+ "\">"
+					+ instancesAndTitle.get(idInstance)
 					+ "</a>\r\n";
 		}
 		

@@ -26,15 +26,18 @@ public class PatientInstances implements Serializable {
 	private String patient;
 	@Column(name = "instance", nullable = false)
 	private Long instance;
+	@Column(name = "title", nullable = false)
+	private String title;
 
 	public PatientInstances() {
 		super();
 		// TODO Auto-generated constructor stub
 	}
 
-	public PatientInstances(String patient, Long instance) {
+	public PatientInstances(String patient, Long instance, String title) {
 		this.patient = patient;
 		this.instance = instance;
+		this.title = title;
 	}
 
 	public Long getId() {
@@ -59,6 +62,14 @@ public class PatientInstances implements Serializable {
 
 	public void setInstance(Long instance) {
 		this.instance = instance;
+	}
+
+	public String getTitle() {
+		return title;
+	}
+
+	public void setTitle(String title) {
+		this.title = title;
 	}
 
 }

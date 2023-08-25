@@ -145,9 +145,12 @@ public class PractitionerServiceImpl implements IPractitionerService {
 	public void completedTask(HttpServletRequest request) {
 		// Obtenemos los campos rellenados del Meta-Cuestionario en un Map
 		Map<String, String[]> responseForm = request.getParameterMap();
+		
+		// Obtenemos el titulo
+		String title = responseForm.get("1.1")[0];
 				
 		// Obtenemos la lista de pacientes a los que va dirigido el consentimiento
-		List<String> patientList = getPatientList(responseForm.get("1.1")[0]);
+		List<String> patientList = getPatientList(responseForm.get("1.2")[0]);
 				
 		// Borramos el campo correspondiente a los pacientes
 		responseForm = deleteFielsPatients(responseForm);
@@ -164,6 +167,7 @@ public class PractitionerServiceImpl implements IPractitionerService {
 		Map<String, Object> params = new HashMap<String, Object>();
 		params.put("questionnaireResponse", questionnaireResponse);
 		params.put("patientList", patientList);
+		params.put("title", title);
 				
 		UserTaskServicesClient userClient = util.getUserTaskServicesClient();
 		userClient.completeTask(containerId, idTask, user.getDni(), params);
@@ -180,7 +184,7 @@ public class PractitionerServiceImpl implements IPractitionerService {
 			String key = entry.getKey();
 			String[] values = entry.getValue();
 			
-			if (!(key.equals("1.1"))) {
+			if (!(key.equals("1.2"))) {
 				result.put(key, values);
 			}
 		}
@@ -207,17 +211,21 @@ public class PractitionerServiceImpl implements IPractitionerService {
 			
 		for (ProcessInstance processInstance : processInstancesList) {
 			if (processInstance.getProcessName().equals("patientProcess")) {
+				Long processInstanceId = processInstance.getId();
+				
 				// Obtenemos las variables de la instancia
-				List<VariableInstance> variableList = queryClient.findVariablesCurrentState(processInstance.getId());
+				List<VariableInstance> variableList = queryClient.findVariablesCurrentState(processInstanceId);
+				
+				// Obtenemos la variable "title"
+				String title = queryClient.findVariableHistory(processInstanceId, "title", 0, 0).get(0).getValue();
 					
 				// Obtenemos la variable "patient"
 				for (VariableInstance variableInstance : variableList) {
 					if (variableInstance.getVariableName().equals("patient")) {
 						String patientVar = variableInstance.getValue();
-						Long processInstanceId = processInstance.getId();
 						// Comprobamos que existe ese paciente en la bbdd					
 						if (userDAO.existsById(patientVar)) {
-							PatientInstances patientInstances = new PatientInstances(patientVar, processInstanceId);
+							PatientInstances patientInstances = new PatientInstances(patientVar, processInstanceId, title);
 							patientInstancesDAO.save(patientInstances);
 						} else {
 							// Abortamos esa instancia, ya que no existe el paciente
