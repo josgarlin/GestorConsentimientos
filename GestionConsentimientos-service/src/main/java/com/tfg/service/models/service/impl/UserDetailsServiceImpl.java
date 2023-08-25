@@ -23,6 +23,8 @@ public class UserDetailsServiceImpl implements UserDetailsService {
 
 	@Override
 	public UserDetails loadUserByUsername(String username) throws UsernameNotFoundException {
+		username = username.toUpperCase(); // En la bbdd se guarda en mayusculas
+		
 		User user = userDAO.findByDni(username);
 		UserBuilder builder = null;
 		

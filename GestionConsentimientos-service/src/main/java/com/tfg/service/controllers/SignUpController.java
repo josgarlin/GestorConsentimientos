@@ -31,9 +31,10 @@ public class SignUpController {
 		if (result.hasErrors()) {
 			redirect = "redirect:/signup";
 		} else {
-			if (userService.checkDNIFormat(user.getDni())) {
+			if (userService.checkDNIFormatError(user.getDni())) {
 				redirect = "redirect:/signup?error";
 			} else {
+				user.setDni(user.getDni().toUpperCase());
 				if (userService.checkDNIExist(user.getDni())) {
 					redirect = "redirect:/signup?exist";
 				} else {

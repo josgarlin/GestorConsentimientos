@@ -40,7 +40,7 @@ public class UserServiceImpl implements IUserService {
 	}
 
 	@Override
-	public Boolean checkDNIFormat(String dni) {
+	public Boolean checkDNIFormatError(String dni) {
 		Boolean result = null;
 		String pattern = "\\d{8}[A-Za-z]";
 		
