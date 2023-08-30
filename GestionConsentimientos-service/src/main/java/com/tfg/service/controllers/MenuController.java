@@ -68,7 +68,7 @@ public class MenuController {
 	@GetMapping("/patient")
 	@ResponseBody
 	private String menuPatient(Authentication auth) {
-		String contentHtml = patientService.generateFile(auth.getName());
+		String contentHtml = patientService.generateFile(auth.getName().toUpperCase());
 		
 		return contentHtml;
 	}

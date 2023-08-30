@@ -218,7 +218,7 @@ public class QuestionnaireToFormPatient implements IMapper<Questionnaire, String
 			String code = option.getValueCoding().getCode();
 			String display = option.getValueCoding().getDisplay();
 			if (checkMark(values, code)) {
-				component = component + "<label><input type=\"checkbox\" name=\"" + id + "\" value=\"" + code + "\" checked><span>" + display + "</span></label>\r\n";
+				component = component + "<label><input type=\"checkbox\" name=\"" + id + "\" value=\"" + code + "\" checked disabled><span>" + display + "</span></label>\r\n";
 			} else {
 				component = component + "<label><input type=\"checkbox\" name=\"" + id + "\" value=\"" + code + "\" disabled><span>" + display + "</span></label>\r\n";
 			}
@@ -346,6 +346,9 @@ public class QuestionnaireToFormPatient implements IMapper<Questionnaire, String
 				+ "\r\n"
 				+ ".consent-question input[type=\"radio\"]:focus {\r\n"
 				+ "	box-shadow: 0 0 3 px #333333;\r\n"
+				+ "}\r\n"
+				+ ".checkbox-group label input[type=\"checkbox\"]:checked + span {\r\n"
+				+ "  font-weight: bold;\r\n"
 				+ "}\r\n"
 				+ "</style>\r\n";
 		

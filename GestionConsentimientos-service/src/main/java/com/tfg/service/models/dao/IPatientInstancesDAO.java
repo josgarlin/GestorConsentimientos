@@ -15,5 +15,6 @@ public interface IPatientInstancesDAO extends JpaRepository<PatientInstances, Lo
 	List<PatientInstances> findByPatient(String patient);
 	@Transactional
 	void deleteByPatientAndInstance(String patient, Long instance);
+	Boolean existsByInstance(Long instance);
 
 }

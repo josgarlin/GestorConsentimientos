@@ -8,5 +8,7 @@ public interface IPractitionerService {
 	
 	public String requestConsent(User user);
 	public void completedTask(HttpServletRequest request);
+	public String consentsRequested(String dni);
+	public String seeConsent(Long idInstanceProcess);
 
 }

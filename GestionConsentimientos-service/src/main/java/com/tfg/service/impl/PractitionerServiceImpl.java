@@ -24,11 +24,15 @@ import org.springframework.stereotype.Service;
 
 import com.tfg.service.IPractitionerService;
 import com.tfg.service.KieUtil;
+import com.tfg.service.mapper.CreateConsentsRequestedMenu;
 import com.tfg.service.mapper.MapToQuestionnaireResponse;
+import com.tfg.service.mapper.QuestionnaireResponseToViewForm;
 import com.tfg.service.mapper.QuestionnaireToFormPractitioner;
 import com.tfg.service.models.dao.IPatientInstancesDAO;
+import com.tfg.service.models.dao.IPractitionerInstancesDAO;
 import com.tfg.service.models.dao.IUserDAO;
 import com.tfg.service.models.entity.PatientInstances;
+import com.tfg.service.models.entity.PractitionerInstances;
 import com.tfg.service.models.entity.User;
 
 import ca.uhn.fhir.context.FhirContext;
@@ -56,6 +60,8 @@ public class PractitionerServiceImpl implements IPractitionerService {
 	
 	private final QuestionnaireToFormPractitioner questionnaireToFormPractitioner = new QuestionnaireToFormPractitioner();
 	private MapToQuestionnaireResponse mapToQuestionnaireResponse;
+	private final CreateConsentsRequestedMenu createConsentsRequestedMenu = new CreateConsentsRequestedMenu();
+	private QuestionnaireResponseToViewForm questionnaireResponseToViewForm;
 	
 	private static Questionnaire questionnaire;
 	private static Long idTask;
@@ -65,6 +71,9 @@ public class PractitionerServiceImpl implements IPractitionerService {
 	
 	@Autowired
 	private IPatientInstancesDAO patientInstancesDAO;
+	
+	@Autowired
+	private IPractitionerInstancesDAO practitionerInstancesDAO;
 
 	@Override
 	public String requestConsent(User user) {
@@ -150,7 +159,8 @@ public class PractitionerServiceImpl implements IPractitionerService {
 		String title = responseForm.get("1.1")[0];
 				
 		// Obtenemos la lista de pacientes a los que va dirigido el consentimiento
-		List<String> patientList = getPatientList(responseForm.get("1.2")[0]);
+		String patients = responseForm.get("1.2")[0];
+		List<String> patientList = getPatientList(patients);
 				
 		// Borramos el campo correspondiente a los pacientes
 		responseForm = deleteFielsPatients(responseForm);
@@ -172,6 +182,9 @@ public class PractitionerServiceImpl implements IPractitionerService {
 		UserTaskServicesClient userClient = util.getUserTaskServicesClient();
 		userClient.completeTask(containerId, idTask, user.getDni(), params);
 		logger.info("TAREA CON ID = "+idTask+" COMPLETADA CON ÉXITO");
+		
+		// Asociamos la instancia del proceso al practitioner
+		consentsRequestedPractitionerProcess(responseForm, patients);
 				
 		// Asociamos los pacientes con la instancia de proceso correspondiente
 		pendingPatientProcess(patientList);
@@ -207,7 +220,6 @@ public class PractitionerServiceImpl implements IPractitionerService {
 		// Estado "Activo"
 		status.add(1);
 		List<ProcessInstance> processInstancesList = queryClient.findProcessInstancesByContainerId(containerId+"-1_0-SNAPSHOT", status, 0, 10);
-		System.out.println(processInstancesList);
 			
 		for (ProcessInstance processInstance : processInstancesList) {
 			if (processInstance.getProcessName().equals("patientProcess")) {
@@ -224,8 +236,8 @@ public class PractitionerServiceImpl implements IPractitionerService {
 					if (variableInstance.getVariableName().equals("patient")) {
 						String patientVar = variableInstance.getValue();
 						// Comprobamos que existe ese paciente en la bbdd					
-						if (userDAO.existsById(patientVar)) {
-							PatientInstances patientInstances = new PatientInstances(patientVar, processInstanceId, title);
+						if (userDAO.existsById(patientVar.toUpperCase()) && !(patientInstancesDAO.existsByInstance(processInstanceId))) {
+							PatientInstances patientInstances = new PatientInstances(patientVar.toUpperCase(), processInstanceId, title);
 							patientInstancesDAO.save(patientInstances);
 						} else {
 							// Abortamos esa instancia, ya que no existe el paciente
@@ -236,6 +248,68 @@ public class PractitionerServiceImpl implements IPractitionerService {
 	            }
 			}
 		}
+	}
+	
+	// Asociamos el identificador del practitioner con su proceso activo, su instancia
+	private void consentsRequestedPractitionerProcess(Map<String, String[]> responseForm, String patients) {
+		// Obtenemos la fecha de fin de validez
+		String endDate = responseForm.get("1.4")[1];
+		
+		// Obtener todos los procesos instanciados del contenedor
+		QueryServicesClient queryClient = util.getQueryServicesClient();
+		List<Integer> status = new ArrayList<Integer>();
+		// Estado "Activo"
+		status.add(1);
+		List<ProcessInstance> processInstancesList = queryClient.findProcessInstancesByContainerId(containerId+"-1_0-SNAPSHOT", status, 0, 10);
+		
+		for (ProcessInstance processInstance : processInstancesList) {
+			if (processInstance.getProcessName().equals("practitionerProcess")) {
+				Long processInstanceId = processInstance.getId();
+				
+				// Obtenemos la variable "title"
+				String title = queryClient.findVariableHistory(processInstanceId, "title", 0, 0).get(0).getValue();
+				
+				// Obtenemos la variable "questionnaireResponse
+				String questionnaireResponse = queryClient.findVariableHistory(processInstanceId, "id_QuestionnaireResponse", 0, 0).get(0).getValue();
+				
+				// Obtenemos la variable initiator
+				String initiator = queryClient.findVariableHistory(processInstanceId, "initiator", 0, 0).get(0).getValue();
+				if (initiator.equals(user.getDni()) && !(practitionerInstancesDAO.existsByInstance(processInstanceId))) {
+					PractitionerInstances practitionerInstances = new PractitionerInstances(user.getDni(), processInstanceId, title, endDate, questionnaireResponse, patients);
+					practitionerInstancesDAO.save(practitionerInstances);
+				}
+			}
+		}
+	}
+
+	@Override
+	public String consentsRequested(String dni) {
+		String contentHtml = null;
+		
+		// Instancias de procesos del practitioner
+		List<PractitionerInstances> practitionerInstancesList = practitionerInstancesDAO.findByPractitioner(dni);
+		
+		Map<Long, String> instancesAndTitle = new HashMap<Long, String>();
+		for (PractitionerInstances practitionerInstances : practitionerInstancesList) {
+			instancesAndTitle.put(practitionerInstances.getInstance(), practitionerInstances.getTitle());
+		}
+		
+		contentHtml = createConsentsRequestedMenu.map(instancesAndTitle);
+		
+		return contentHtml;
+	}
+
+	@Override
+	public String seeConsent(Long idInstanceProcess) {
+		String contentHtml = null;
+		
+		// Obtenemos el PractitionerInstances correspondienta a la instancia de proceso
+		PractitionerInstances practitionerInstances = practitionerInstancesDAO.findByInstance(idInstanceProcess);
+		
+		questionnaireResponseToViewForm = new QuestionnaireResponseToViewForm(practitionerInstances.getPatients());
+		contentHtml = questionnaireResponseToViewForm.map(practitionerInstances.getQuestionnaireResponse());
+
+		return contentHtml;
 	}
 
 }

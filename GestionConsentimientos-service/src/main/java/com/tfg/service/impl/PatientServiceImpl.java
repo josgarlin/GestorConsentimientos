@@ -1,6 +1,5 @@
 package com.tfg.service.impl;
 
-import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -70,14 +69,14 @@ public class PatientServiceImpl implements IPatientService {
 	@Override
 	public String generateFile(String dni) {
 		String contentHtml = null;
-
+		
 		// Instancias de procesos del paciente autenticado
 		List<PatientInstances> patientInstancesList = patientInstancesDAO.findByPatient(dni);
 		Map<Long, String> instancesAndTitle = new HashMap<Long, String>();
 		for (PatientInstances patientInstances : patientInstancesList) {
 			instancesAndTitle.put(patientInstances.getInstance(), patientInstances.getTitle());
 		}
-
+		
 		// Comprobamos si ademas de Patient es Practitioner
 		Boolean isPractitioner = userDAO.isPractitionerByDni(dni);
 		createPatientMenu = new CreatePatientMenu(isPractitioner);
