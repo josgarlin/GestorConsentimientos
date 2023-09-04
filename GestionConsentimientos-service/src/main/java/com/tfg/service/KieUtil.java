@@ -22,10 +22,6 @@ public class KieUtil {
 		PASSWORD = pASSWORD;
 	}
 
-	public void ejemplo() {
-		System.out.println(this.URL);
-	}
-
 	public ProcessServicesClient getProcessServicesClient() {
 		KieServicesClient kieServicesClient = getKieServicesClient();
 		ProcessServicesClient processServicesClient = kieServicesClient.getServicesClient(ProcessServicesClient.class);

@@ -31,37 +31,23 @@ public class DefaultWebSecurityConfig extends WebSecurityConfigurerAdapter {
                 .cors().and()
                 .csrf().disable()
                 .authorizeRequests()
-                .antMatchers("/rest/*").authenticated().and()
+                	.antMatchers("/", "/login/**", "/signup/**").permitAll()
+                	.antMatchers("/rest/*").authenticated()
+                	.anyRequest().authenticated()
+                	.and()
+                .formLogin()
+					.loginPage("/login")
+					.defaultSuccessUrl("/private/", true)
+					.failureUrl("/login?error")
+					.loginProcessingUrl("/loginUser").permitAll()
+					.and()
                 .httpBasic().and()
                 .headers().frameOptions().disable();
-    	
-    	http
-			.authorizeRequests()
-//				.antMatchers("/", "/login/**", "/signup/**", "/rest/**").permitAll()
-				.antMatchers("/", "/login/**", "/signup/**").permitAll()
-				.antMatchers("/rest/*").authenticated()
-				.anyRequest().authenticated()
-				.and()
-			.formLogin()
-				.loginPage("/login")
-				.defaultSuccessUrl("/private/", true)
-				.failureUrl("/login?error")
-				.loginProcessingUrl("/loginUser").permitAll()
-				.and()
-			.headers().frameOptions().disable().and()
-			.csrf().disable()
-			.cors();
     }
 
     @Autowired
     public void configureGlobal(AuthenticationManagerBuilder auth) throws Exception {
-
-//        auth.inMemoryAuthentication().withUser("user").password("user").roles("kie-server");
-//        auth.inMemoryAuthentication().withUser("wbadmin").password("wbadmin").roles("admin");
-//        auth.inMemoryAuthentication().withUser("kieserver").password("kieserver1!").roles("kie-server");
-    	
     	auth.userDetailsService(userDetailsService).passwordEncoder(passwordEncoder());
-//    	auth.inMemoryAuthentication().withUser("12345678a").password("1234").roles("Practitioner");
     }
 
     @Bean
