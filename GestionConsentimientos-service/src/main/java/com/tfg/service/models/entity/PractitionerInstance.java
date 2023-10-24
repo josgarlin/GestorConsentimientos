@@ -11,7 +11,7 @@ import javax.persistence.Table;
 
 @Entity
 @Table(name = "practitioner_instances")
-public class PractitionerInstances implements Serializable {
+public class PractitionerInstance implements Serializable {
 
 	/**
 	 * 
@@ -35,12 +35,11 @@ public class PractitionerInstances implements Serializable {
 	@Column(name = "patients", nullable = false)
 	private String patients;
 
-	public PractitionerInstances() {
-		super();
+	public PractitionerInstance() {
 		// TODO Auto-generated constructor stub
 	}
 
-	public PractitionerInstances(String practitioner, Long instance, String title, String endDate,
+	public PractitionerInstance(String practitioner, Long instance, String title, String endDate,
 			String questionnaireResponse, String patients) {
 		this.practitioner = practitioner;
 		this.instance = instance;

@@ -5,13 +5,13 @@ import java.util.List;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.stereotype.Repository;
 
-import com.tfg.service.models.entity.PractitionerInstances;
+import com.tfg.service.models.entity.PractitionerInstance;
 
 @Repository
-public interface IPractitionerInstancesDAO extends JpaRepository<PractitionerInstances, Long> {
+public interface IPractitionerInstancesDAO extends JpaRepository<PractitionerInstance, Long> {
 	
-	List<PractitionerInstances> findByPractitioner(String practitioner);
+	List<PractitionerInstance> findByPractitioner(String practitioner);
 	Boolean existsByInstance(Long instance);
-	PractitionerInstances  findByInstance(Long instance);
+	PractitionerInstance  findByInstance(Long instance);
 
 }

@@ -11,13 +11,13 @@ import javax.persistence.Table;
 
 @Entity
 @Table(name = "patient_instances")
-public class PatientInstances implements Serializable {
+public class PatientInstance implements Serializable {
 
 	/**
 	 * 
 	 */
 	private static final long serialVersionUID = 1L;
-	
+
 	@Id
 	@GeneratedValue(strategy = GenerationType.AUTO)
 	@Column(name = "id", nullable = false)
@@ -29,12 +29,10 @@ public class PatientInstances implements Serializable {
 	@Column(name = "title", nullable = false)
 	private String title;
 
-	public PatientInstances() {
-		super();
-		// TODO Auto-generated constructor stub
+	public PatientInstance() {
 	}
 
-	public PatientInstances(String patient, Long instance, String title) {
+	public PatientInstance(String patient, Long instance, String title) {
 		this.patient = patient;
 		this.instance = instance;
 		this.title = title;

@@ -7,7 +7,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
 import com.tfg.service.models.dao.IPractitionerInstancesDAO;
-import com.tfg.service.models.entity.PractitionerInstances;
+import com.tfg.service.models.entity.PractitionerInstance;
 
 @Component
 public class MyScheduledTask {
@@ -21,9 +21,9 @@ public class MyScheduledTask {
 		LocalDate currentDate = LocalDate.now();
 		
 		// Obtenemos toda la bbdd con los procesos instanciados por los practitioners
-		List<PractitionerInstances> practitionerInstancesList = practitionerInstancesDAO.findAll();
+		List<PractitionerInstance> practitionerInstancesList = practitionerInstancesDAO.findAll();
 		
-		for (PractitionerInstances practitionerInstances : practitionerInstancesList) {
+		for (PractitionerInstance practitionerInstances : practitionerInstancesList) {
 			LocalDate endDate = LocalDate.parse(practitionerInstances.getEndDate());
 			
 			if (currentDate.isAfter(endDate)) {

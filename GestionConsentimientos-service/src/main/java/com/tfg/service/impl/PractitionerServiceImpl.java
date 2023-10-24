@@ -31,8 +31,8 @@ import com.tfg.service.mapper.QuestionnaireToFormPractitioner;
 import com.tfg.service.models.dao.IPatientInstancesDAO;
 import com.tfg.service.models.dao.IPractitionerInstancesDAO;
 import com.tfg.service.models.dao.IUserDAO;
-import com.tfg.service.models.entity.PatientInstances;
-import com.tfg.service.models.entity.PractitionerInstances;
+import com.tfg.service.models.entity.PatientInstance;
+import com.tfg.service.models.entity.PractitionerInstance;
 import com.tfg.service.models.entity.User;
 
 import ca.uhn.fhir.context.FhirContext;
@@ -178,7 +178,7 @@ public class PractitionerServiceImpl implements IPractitionerService {
 		params.put("questionnaireResponse", questionnaireResponse);
 		params.put("patientList", patientList);
 		params.put("title", title);
-				
+		
 		UserTaskServicesClient userClient = util.getUserTaskServicesClient();
 		userClient.completeTask(containerId, idTask, user.getDni(), params);
 		logger.info("TAREA CON ID = "+idTask+" COMPLETADA CON ÉXITO");
@@ -187,7 +187,7 @@ public class PractitionerServiceImpl implements IPractitionerService {
 		consentsRequestedPractitionerProcess(responseForm, patients);
 				
 		// Asociamos los pacientes con la instancia de proceso correspondiente
-		pendingPatientProcess(patientList);
+		pendingPatientProcess();
 	}
 	
 	private Map<String, String[]> deleteFielsPatients(Map<String, String[]> response){
@@ -213,16 +213,16 @@ public class PractitionerServiceImpl implements IPractitionerService {
 	}
 	
 	// Asocia el identificador del paciente con su proceso activo, su instancia
-	private void pendingPatientProcess(List<String> patientList) {
+	private void pendingPatientProcess() {
 		// Obtener todos los procesos instanciados del contenedor
 		QueryServicesClient queryClient = util.getQueryServicesClient();
 		List<Integer> status = new ArrayList<Integer>();
 		// Estado "Activo"
 		status.add(1);
 		List<ProcessInstance> processInstancesList = queryClient.findProcessInstancesByContainerId(containerId+"-1_0-SNAPSHOT", status, 0, 10);
-			
+		
 		for (ProcessInstance processInstance : processInstancesList) {
-			if (processInstance.getProcessName().equals("patientProcess")) {
+			if (processInstance.getProcessName().equals("confirmacionConsentimiento")) {
 				Long processInstanceId = processInstance.getId();
 				
 				// Obtenemos las variables de la instancia
@@ -230,22 +230,26 @@ public class PractitionerServiceImpl implements IPractitionerService {
 				
 				// Obtenemos la variable "title"
 				String title = queryClient.findVariableHistory(processInstanceId, "title", 0, 0).get(0).getValue();
-					
+				
 				// Obtenemos la variable "patient"
 				for (VariableInstance variableInstance : variableList) {
 					if (variableInstance.getVariableName().equals("patient")) {
 						String patientVar = variableInstance.getValue();
-						// Comprobamos que existe ese paciente en la bbdd					
-						if (userDAO.existsById(patientVar.toUpperCase()) && !(patientInstancesDAO.existsByInstance(processInstanceId))) {
-							PatientInstances patientInstances = new PatientInstances(patientVar.toUpperCase(), processInstanceId, title);
-							patientInstancesDAO.save(patientInstances);
-						} else {
-							// Abortamos esa instancia, ya que no existe el paciente
-							ProcessServicesClient processServicesClient = util.getProcessServicesClient();
-							processServicesClient.abortProcessInstance(containerId, processInstanceId);
+						
+						// Comprobamos que no existe esa instancia en la bbdd
+						if (!(patientInstancesDAO.existsByInstance(processInstanceId))) {
+							// Comprobamos que existe ese paciente en la bbdd					
+							if (userDAO.existsById(patientVar.toUpperCase())) {
+								PatientInstance patientInstances = new PatientInstance(patientVar.toUpperCase(), processInstanceId, title);
+								patientInstancesDAO.save(patientInstances);
+							} else {
+								// Abortamos esa instancia, ya que no existe el paciente
+								ProcessServicesClient processServicesClient = util.getProcessServicesClient();
+								processServicesClient.abortProcessInstance(containerId, processInstanceId);
+							}
 						}
 					}
-	            }
+				}
 			}
 		}
 	}
@@ -263,7 +267,7 @@ public class PractitionerServiceImpl implements IPractitionerService {
 		List<ProcessInstance> processInstancesList = queryClient.findProcessInstancesByContainerId(containerId+"-1_0-SNAPSHOT", status, 0, 10);
 		
 		for (ProcessInstance processInstance : processInstancesList) {
-			if (processInstance.getProcessName().equals("practitionerProcess")) {
+			if (processInstance.getProcessName().equals("solicitudConsentimiento")) {
 				Long processInstanceId = processInstance.getId();
 				
 				// Obtenemos la variable "title"
@@ -274,9 +278,10 @@ public class PractitionerServiceImpl implements IPractitionerService {
 				
 				// Obtenemos la variable initiator
 				String initiator = queryClient.findVariableHistory(processInstanceId, "initiator", 0, 0).get(0).getValue();
+				
 				if (initiator.equals(user.getDni()) && !(practitionerInstancesDAO.existsByInstance(processInstanceId))) {
-					PractitionerInstances practitionerInstances = new PractitionerInstances(user.getDni(), processInstanceId, title, endDate, questionnaireResponse, patients);
-					practitionerInstancesDAO.save(practitionerInstances);
+					PractitionerInstance practitionerInstance = new PractitionerInstance(user.getDni(), processInstanceId, title, endDate, questionnaireResponse, patients);
+					practitionerInstancesDAO.save(practitionerInstance);
 				}
 			}
 		}
@@ -287,10 +292,10 @@ public class PractitionerServiceImpl implements IPractitionerService {
 		String contentHtml = null;
 		
 		// Instancias de procesos del practitioner
-		List<PractitionerInstances> practitionerInstancesList = practitionerInstancesDAO.findByPractitioner(dni);
+		List<PractitionerInstance> practitionerInstancesList = practitionerInstancesDAO.findByPractitioner(dni);
 		
 		Map<Long, String> instancesAndTitle = new HashMap<Long, String>();
-		for (PractitionerInstances practitionerInstances : practitionerInstancesList) {
+		for (PractitionerInstance practitionerInstances : practitionerInstancesList) {
 			instancesAndTitle.put(practitionerInstances.getInstance(), practitionerInstances.getTitle());
 		}
 		
@@ -304,7 +309,7 @@ public class PractitionerServiceImpl implements IPractitionerService {
 		String contentHtml = null;
 		
 		// Obtenemos el PractitionerInstances correspondienta a la instancia de proceso
-		PractitionerInstances practitionerInstances = practitionerInstancesDAO.findByInstance(idInstanceProcess);
+		PractitionerInstance practitionerInstances = practitionerInstancesDAO.findByInstance(idInstanceProcess);
 		
 		questionnaireResponseToViewForm = new QuestionnaireResponseToViewForm(practitionerInstances.getPatients());
 		contentHtml = questionnaireResponseToViewForm.map(practitionerInstances.getQuestionnaireResponse());

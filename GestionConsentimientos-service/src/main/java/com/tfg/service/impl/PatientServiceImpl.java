@@ -24,7 +24,7 @@ import com.tfg.service.mapper.QuestionnaireResponseToQuestionnaire;
 import com.tfg.service.mapper.QuestionnaireToFormPatient;
 import com.tfg.service.models.dao.IPatientInstancesDAO;
 import com.tfg.service.models.dao.IUserDAO;
-import com.tfg.service.models.entity.PatientInstances;
+import com.tfg.service.models.entity.PatientInstance;
 import com.tfg.service.models.entity.User;
 
 import ca.uhn.fhir.context.FhirContext;
@@ -70,9 +70,9 @@ public class PatientServiceImpl implements IPatientService {
 		String contentHtml = null;
 		
 		// Instancias de procesos del paciente autenticado
-		List<PatientInstances> patientInstancesList = patientInstancesDAO.findByPatient(dni);
+		List<PatientInstance> patientInstancesList = patientInstancesDAO.findByPatient(dni);
 		Map<Long, String> instancesAndTitle = new HashMap<Long, String>();
-		for (PatientInstances patientInstances : patientInstancesList) {
+		for (PatientInstance patientInstances : patientInstancesList) {
 			instancesAndTitle.put(patientInstances.getInstance(), patientInstances.getTitle());
 		}
 		
